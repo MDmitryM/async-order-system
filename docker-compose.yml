@@ -80,6 +80,17 @@ services:
       - kafka3
     networks:
       - kafka-net
+  api:
+    container_name: api-server
+    image: mdmitrym/order-system-api:latest
+    ports:
+      - 8080:8080
+    env_file:
+      - services/api/.env
+    environment:
+      - ENV=prod
+    networks:
+      - kafka-net
 
 networks:
   kafka-net:
