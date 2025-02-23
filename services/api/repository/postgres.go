@@ -2,11 +2,24 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/pgx/v5"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
 )
+
+type PostresConfig struct {
+	Host     string
+	Port     string
+	PG_User  string
+	PG_Pwd   string
+	PG_DB    string
+	SSL_Mode string
+}
 
 type postgres struct {
 	db *pgxpool.Pool
@@ -18,7 +31,17 @@ var (
 	initErr    error
 )
 
-func NewPostgresDB(ctx context.Context, dsn string) (*postgres, error) {
+func NewPostgresDB(ctx context.Context, cfg PostresConfig) (*postgres, error) {
+	dsn := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.Host,
+		cfg.Port,
+		cfg.PG_User,
+		cfg.PG_Pwd,
+		cfg.PG_DB,
+		cfg.SSL_Mode,
+	)
+
 	pgOnce.Do(func() {
 		dbpool, err := pgxpool.New(ctx, dsn)
 		if err != nil {
@@ -35,9 +58,31 @@ func NewPostgresDB(ctx context.Context, dsn string) (*postgres, error) {
 
 		pgInstance = &postgres{dbpool}
 		logrus.Info("Successfully initialized Postgres connection pool")
+
+		migrateDSN := fmt.Sprintf("pgx5://%s:%s@%s:%s/%s?sslmode=%s",
+			cfg.PG_User, cfg.PG_Pwd, cfg.Host, cfg.Port, cfg.PG_DB, cfg.SSL_Mode)
+
+		m, err := migrate.New("file://migrations", migrateDSN+"&x-migrations-table=order_migrations")
+		if err != nil {
+			initErr = err
+			logrus.Errorf("Unable to initialize migrations: %v", err.Error())
+			return
+		}
+
+		if err = m.Up(); err != nil && err != migrate.ErrNoChange {
+			initErr = err
+			logrus.Errorf("Unable to apply migrations")
+			return
+		}
+
+		logrus.Info("migrations apllied successfully")
 	})
 
 	if initErr != nil {
+		return nil, initErr
+	}
+
+	if pgInstance == nil {
 		return nil, initErr
 	}
 

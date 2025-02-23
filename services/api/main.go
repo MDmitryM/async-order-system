@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -28,14 +27,18 @@ func main() {
 		}
 	}
 
-	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		os.Getenv("API_DB_HOST"), os.Getenv("API_DB_PORT"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"), os.Getenv("API_DB_SSL_MODE"),
-	)
+	cfg := repository.PostresConfig{
+		Host:     os.Getenv("API_DB_HOST"),
+		Port:     os.Getenv("API_DB_PORT"),
+		PG_User:  os.Getenv("POSTGRES_USER"),
+		PG_Pwd:   os.Getenv("POSTGRES_PASSWORD"),
+		PG_DB:    os.Getenv("POSTGRES_DB"),
+		SSL_Mode: os.Getenv("API_DB_SSL_MODE"),
+	}
 
 	rootCtx := context.Background()
 
-	pgPool, err := repository.NewPostgresDB(rootCtx, dsn)
+	pgPool, err := repository.NewPostgresDB(rootCtx, cfg)
 	if err != nil {
 		logrus.Fatalf("Error while creating connection pool: %v", err.Error())
 	}

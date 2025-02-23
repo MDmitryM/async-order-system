@@ -1,0 +1,1 @@
+alter table orders add column payment_method text not null DEFAULT 'unknown';
