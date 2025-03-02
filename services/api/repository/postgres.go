@@ -22,7 +22,8 @@ type PostresConfig struct {
 }
 
 type postgres struct {
-	db *pgxpool.Pool
+	db      *pgxpool.Pool
+	querier Querier
 }
 
 var (
@@ -31,7 +32,7 @@ var (
 	initErr    error
 )
 
-func NewPostgresDB(ctx context.Context, cfg PostresConfig) (*postgres, error) {
+func NewPostgresDB(ctx context.Context, cfg PostresConfig) (Repository, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		cfg.Host,
@@ -56,7 +57,9 @@ func NewPostgresDB(ctx context.Context, cfg PostresConfig) (*postgres, error) {
 			return
 		}
 
-		pgInstance = &postgres{dbpool}
+		queries := New(dbpool)
+
+		pgInstance = &postgres{dbpool, queries}
 		logrus.Info("Successfully initialized Postgres connection pool")
 
 		migrateDSN := fmt.Sprintf("pgx5://%s:%s@%s:%s/%s?sslmode=%s",
@@ -95,4 +98,20 @@ func (pg *postgres) Ping(ctx context.Context) error {
 
 func (pg *postgres) Close() {
 	pg.db.Close()
+}
+
+func (p *postgres) CreateOrder(ctx context.Context, params CreateOrderParams) (Order, error) {
+	return p.querier.CreateOrder(ctx, params)
+}
+
+func (p *postgres) GetOrderByID(ctx context.Context, id int32) (Order, error) {
+	return p.querier.GetOrderByID(ctx, id)
+}
+
+func (p *postgres) ListOrders(ctx context.Context, params ListOrdersParams) ([]Order, error) {
+	return p.querier.ListOrders(ctx, params)
+}
+
+func (p *postgres) UpdateOrderStatus(ctx context.Context, params UpdateOrderStatusParams) (Order, error) {
+	return p.querier.UpdateOrderStatus(ctx, params)
 }

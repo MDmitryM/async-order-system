@@ -54,7 +54,8 @@ func main() {
 		WriteTimeout:  10 * time.Second,
 	})
 
-	handler.InitRouts(app)
+	h := handler.NewHandler(&pgPool)
+	h.InitRouts(app)
 
 	go func() {
 		if err := app.Listen(":" + os.Getenv("PORT")); err != nil {
