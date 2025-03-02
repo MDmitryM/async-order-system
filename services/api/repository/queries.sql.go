@@ -44,6 +44,18 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 	return i, err
 }
 
+const deleteOrderByID = `-- name: DeleteOrderByID :execrows
+delete from orders where id = $1
+`
+
+func (q *Queries) DeleteOrderByID(ctx context.Context, id int32) (int64, error) {
+	result, err := q.db.Exec(ctx, deleteOrderByID, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getOrderByID = `-- name: GetOrderByID :one
 select id, user_id, total, status, created_at, payment_method, product_id from orders where id = $1
 `

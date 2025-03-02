@@ -115,3 +115,7 @@ func (p *postgres) ListOrders(ctx context.Context, params ListOrdersParams) ([]O
 func (p *postgres) UpdateOrderStatus(ctx context.Context, params UpdateOrderStatusParams) (Order, error) {
 	return p.querier.UpdateOrderStatus(ctx, params)
 }
+
+func (p *postgres) DeleteOrderByID(ctx context.Context, id int32) (int64, error) {
+	return p.querier.DeleteOrderByID(ctx, id)
+}

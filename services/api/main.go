@@ -54,7 +54,7 @@ func main() {
 		WriteTimeout:  10 * time.Second,
 	})
 
-	h := handler.NewHandler(&pgPool)
+	h := handler.NewHandler(pgPool)
 	h.InitRouts(app)
 
 	go func() {

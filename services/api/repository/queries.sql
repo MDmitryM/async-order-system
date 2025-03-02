@@ -6,6 +6,9 @@ returning *;
 -- name: GetOrderByID :one
 select * from orders where id = $1;
 
+-- name: DeleteOrderByID :execrows
+delete from orders where id = $1;
+
 -- name: UpdateOrderStatus :one
 update orders set status = $2 where id = $1 returning *;
 
