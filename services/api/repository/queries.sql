@@ -1,6 +1,6 @@
 -- name: CreateOrder :one
-insert into orders (user_id, total, status, payment_method) 
-values ($1, $2, $3, $4)
+insert into orders (user_id, total, status, payment_method, product_id) 
+values ($1, $2, $3, $4, $5)
 returning *;
 
 -- name: GetOrderByID :one

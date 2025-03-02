@@ -1,0 +1,1 @@
+alter table orders add column product_id int not null DEFAULT 0;

@@ -10,9 +10,9 @@ import (
 )
 
 const createOrder = `-- name: CreateOrder :one
-insert into orders (user_id, total, status, payment_method) 
-values ($1, $2, $3, $4)
-returning id, user_id, total, status, created_at, payment_method
+insert into orders (user_id, total, status, payment_method, product_id) 
+values ($1, $2, $3, $4, $5)
+returning id, user_id, total, status, created_at, payment_method, product_id
 `
 
 type CreateOrderParams struct {
@@ -20,6 +20,7 @@ type CreateOrderParams struct {
 	Total         int32  `json:"total"`
 	Status        string `json:"status"`
 	PaymentMethod string `json:"payment_method"`
+	ProductID     int32  `json:"product_id"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order, error) {
@@ -28,6 +29,7 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		arg.Total,
 		arg.Status,
 		arg.PaymentMethod,
+		arg.ProductID,
 	)
 	var i Order
 	err := row.Scan(
@@ -37,12 +39,13 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) (Order
 		&i.Status,
 		&i.CreatedAt,
 		&i.PaymentMethod,
+		&i.ProductID,
 	)
 	return i, err
 }
 
 const getOrderByID = `-- name: GetOrderByID :one
-select id, user_id, total, status, created_at, payment_method from orders where id = $1
+select id, user_id, total, status, created_at, payment_method, product_id from orders where id = $1
 `
 
 func (q *Queries) GetOrderByID(ctx context.Context, id int32) (Order, error) {
@@ -55,12 +58,13 @@ func (q *Queries) GetOrderByID(ctx context.Context, id int32) (Order, error) {
 		&i.Status,
 		&i.CreatedAt,
 		&i.PaymentMethod,
+		&i.ProductID,
 	)
 	return i, err
 }
 
 const listOrders = `-- name: ListOrders :many
-select id, user_id, total, status, created_at, payment_method from orders order by created_at desc limit $1 offset $2
+select id, user_id, total, status, created_at, payment_method, product_id from orders order by created_at desc limit $1 offset $2
 `
 
 type ListOrdersParams struct {
@@ -84,6 +88,7 @@ func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order
 			&i.Status,
 			&i.CreatedAt,
 			&i.PaymentMethod,
+			&i.ProductID,
 		); err != nil {
 			return nil, err
 		}
@@ -96,7 +101,7 @@ func (q *Queries) ListOrders(ctx context.Context, arg ListOrdersParams) ([]Order
 }
 
 const updateOrderStatus = `-- name: UpdateOrderStatus :one
-update orders set status = $2 where id = $1 returning id, user_id, total, status, created_at, payment_method
+update orders set status = $2 where id = $1 returning id, user_id, total, status, created_at, payment_method, product_id
 `
 
 type UpdateOrderStatusParams struct {
@@ -114,6 +119,7 @@ func (q *Queries) UpdateOrderStatus(ctx context.Context, arg UpdateOrderStatusPa
 		&i.Status,
 		&i.CreatedAt,
 		&i.PaymentMethod,
+		&i.ProductID,
 	)
 	return i, err
 }

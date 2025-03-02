@@ -15,4 +15,5 @@ type Order struct {
 	Status        string             `json:"status"`
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 	PaymentMethod string             `json:"payment_method"`
+	ProductID     int32              `json:"product_id"`
 }
