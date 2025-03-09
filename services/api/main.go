@@ -8,10 +8,19 @@ import (
 	"time"
 
 	"github.com/MDmitryM/async-order-system/services/api/handler"
+	"github.com/MDmitryM/async-order-system/services/api/kafka"
 	"github.com/MDmitryM/async-order-system/services/api/repository"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
+)
+
+var (
+	KAFKA_BROKERS = []string{
+		"kafka1:29091",
+		"kafka2:29092",
+		"kafka3:29093",
+	}
 )
 
 func main() {
@@ -54,7 +63,12 @@ func main() {
 		WriteTimeout:  10 * time.Second,
 	})
 
-	h := handler.NewHandler(pgPool)
+	syncProducer, err := kafka.NewSyncProducer(KAFKA_BROKERS)
+	if err != nil {
+		logrus.Fatalf("Can't create kafka sync producer, %s", err.Error())
+	}
+
+	h := handler.NewHandler(pgPool, syncProducer)
 	h.InitRouts(app)
 
 	go func() {

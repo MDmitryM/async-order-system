@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/MDmitryM/async-order-system/services/api/kafka"
 	"github.com/MDmitryM/async-order-system/services/api/repository"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
@@ -34,6 +35,19 @@ func (h *Handler) OrderCreate(ctx *fiber.Ctx) error {
 		ProductID:     input.ProductID,
 	})
 	if err != nil {
+		return SendJsonError(ctx, http.StatusInternalServerError, err.Error())
+	}
+
+	kafkaOrderModel := kafka.OrderMessage{
+		ID:            createdOrder.ID,
+		UserID:        createdOrder.UserID,
+		Total:         createdOrder.Total,
+		Status:        createdOrder.Status,
+		PaymentMethod: createdOrder.PaymentMethod,
+		ProductID:     createdOrder.ProductID,
+	}
+
+	if err := h.producer.SendOrder(ctx.Context(), kafkaOrderModel); err != nil {
 		return SendJsonError(ctx, http.StatusInternalServerError, err.Error())
 	}
 

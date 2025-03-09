@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/MDmitryM/async-order-system/services/api/kafka"
 	"github.com/MDmitryM/async-order-system/services/api/repository"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -9,12 +10,14 @@ import (
 var validate = validator.New(validator.WithRequiredStructEnabled())
 
 type Handler struct {
-	repo repository.Repository
+	repo     repository.Repository
+	producer *kafka.Producer
 }
 
-func NewHandler(repo repository.Repository) *Handler {
+func NewHandler(repo repository.Repository, prod *kafka.Producer) *Handler {
 	return &Handler{
-		repo: repo,
+		repo:     repo,
+		producer: prod,
 	}
 }
 
