@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -21,6 +22,8 @@ var (
 		"kafka2:29092",
 		"kafka3:29093",
 	}
+
+	CONSUMER_GROUP = "order-api-group"
 )
 
 func main() {
@@ -45,7 +48,7 @@ func main() {
 		SSL_Mode: os.Getenv("API_DB_SSL_MODE"),
 	}
 
-	rootCtx := context.Background()
+	rootCtx, cancel := context.WithCancel(context.Background())
 
 	pgPool, err := repository.NewPostgresDB(rootCtx, cfg)
 	if err != nil {
@@ -68,6 +71,20 @@ func main() {
 		logrus.Fatalf("Can't create kafka sync producer, %s", err.Error())
 	}
 
+	consumerGroup, err := kafka.NewConsumer(KAFKA_BROKERS, CONSUMER_GROUP, pgPool)
+	if err != nil {
+		logrus.Fatalf("Cant create Kafka consumer group: %s", err.Error())
+	}
+	defer consumerGroup.Close()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		if err := consumerGroup.Consume(rootCtx, &wg); err != nil {
+			logrus.Fatalf("Consume failed")
+		}
+	}()
+
 	h := handler.NewHandler(pgPool, syncProducer)
 	h.InitRouts(app)
 
@@ -80,6 +97,9 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
+
+	cancel()
+	wg.Wait()
 
 	if err := app.Shutdown(); err != nil {
 		logrus.Fatalf("error while server shutdown, %s", err.Error())
