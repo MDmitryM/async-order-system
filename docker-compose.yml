@@ -128,6 +128,14 @@ services:
       - 5432:5432
     networks:
       - kafka-net
+  billing:
+    container_name: billing
+    image: mdmitrym/order-system-bill:latest
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    networks:
+      - kafka-net
 
 networks:
   kafka-net:

@@ -5,16 +5,25 @@ import (
 	"sync"
 
 	"github.com/IBM/sarama"
-	"github.com/MDmitryM/async-order-system/services/api/repository"
 	"github.com/sirupsen/logrus"
 )
 
-type PaymentMessage struct {
-	OrderID int32  `json:"order_id"`
-	Status  string `json:"status"`
+const (
+	OrderTopic    = "orders"
+	PaymentTopic  = "payments"
+	ShippingTopic = "shipping"
+)
+
+type OrderMessage struct {
+	ID            int32  `json:"id"`
+	UserID        int32  `json:"user_id"`
+	Total         int32  `json:"total"`
+	Status        string `json:"status"`
+	PaymentMethod string `json:"payment_method"`
+	ProductID     int32  `json:"product_id"`
 }
 
-type ShippingMessage struct {
+type PaymentMessage struct {
 	OrderID int32  `json:"order_id"`
 	Status  string `json:"status"`
 }
@@ -22,10 +31,10 @@ type ShippingMessage struct {
 type Consumer struct {
 	client  sarama.ConsumerGroup
 	groupID string
-	repo    repository.Repository
+	output  chan<- PaymentMessage
 }
 
-func NewConsumer(brokers []string, groupID string, repo repository.Repository) (*Consumer, error) {
+func NewConsumer(brokers []string, groupID string, output chan<- PaymentMessage) (*Consumer, error) {
 	consCfg := sarama.NewConfig()
 	consCfg.Consumer.Group.Rebalance.Strategy = sarama.NewBalanceStrategyRoundRobin()
 	consCfg.Consumer.Offsets.Initial = sarama.OffsetOldest
@@ -39,7 +48,7 @@ func NewConsumer(brokers []string, groupID string, repo repository.Repository) (
 	return &Consumer{
 		client:  client,
 		groupID: groupID,
-		repo:    repo,
+		output:  output,
 	}, nil
 }
 
@@ -49,10 +58,10 @@ func (c *Consumer) Close() error {
 
 func (c *Consumer) Consume(ctx context.Context, wg *sync.WaitGroup) error {
 	defer wg.Done()
-	CGHandler := NewConsumerGroupHandler(c.repo)
+	cgHandler := NewConsumerGroupHandler(c.output)
 
 	for {
-		err := c.client.Consume(ctx, []string{PaymentTopic, ShippingTopic}, CGHandler)
+		err := c.client.Consume(ctx, []string{OrderTopic}, cgHandler)
 		if err != nil {
 			if err == context.Canceled {
 				logrus.Info("Consumer stopped by context")

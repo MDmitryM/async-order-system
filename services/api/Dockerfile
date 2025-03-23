@@ -1,4 +1,4 @@
-FROM golang:latest AS build
+FROM golang:1.23 AS build
 
 ENV GOPATH=/
 WORKDIR /src/

@@ -15,7 +15,7 @@ const (
 )
 
 // TODO: потенциально отрефакторить, оставив тут только объявление структуры и конструктор,
-// а методы раскидать по файлам fe: kafkaOrder.go kafka*.go
+// а методы раскидать по файлам f.e.: kafkaOrder.go kafka*.go
 type OrderMessage struct {
 	ID            int32  `json:"id"`
 	UserID        int32  `json:"user_id"`

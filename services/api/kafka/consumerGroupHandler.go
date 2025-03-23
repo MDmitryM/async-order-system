@@ -30,14 +30,6 @@ func (cgh *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSessio
 	for msg := range claim.Messages() {
 		switch msg.Topic {
 
-		case OrderTopic:
-			var order OrderMessage
-			if err := json.Unmarshal(msg.Value, &order); err != nil {
-				logrus.Errorf("Failed to unmarshall order message: %v", err)
-				continue
-			}
-			logrus.Infof("Received order: %+v from partition %d, offset %d", order, msg.Partition, msg.Offset)
-
 		case PaymentTopic:
 			var payment PaymentMessage
 			if err := json.Unmarshal(msg.Value, &payment); err != nil {
