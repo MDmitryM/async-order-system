@@ -134,6 +134,19 @@ services:
     depends_on:
       kafka-init:
         condition: service_completed_successfully
+      api:
+        condition: service_started
+    networks:
+      - kafka-net
+
+  shipping:
+    container_name: shipping
+    image: mdmitrym/order-system-ship:latest
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+      billing:
+        condition: service_started
     networks:
       - kafka-net
 

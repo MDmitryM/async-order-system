@@ -2,6 +2,7 @@
 
 API_IMAGE_NAME = mdmitrym/order-system-api
 BILLING_IMAGE_NAME = mdmitrym/order-system-bill
+SHIPPING_IMAGE_NAME = mdmitrym/order-system-ship
 #TAG по умолчанию всегда latest
 TAG ?= latest
 
@@ -25,3 +26,12 @@ push-bill:
 clean-bill:
 	docker rmi $(BILLING_IMAGE_NAME):$(TAG)
 
+#сборка shipping сервиса
+build-ship:
+	docker build -f services/shipping/Dockerfile -t $(SHIPPING_IMAGE_NAME):$(TAG) .
+#пуш shipping сервиса
+push-ship:
+	docker push $(SHIPPING_IMAGE_NAME):$(TAG)
+#удалить образ shipping сервиса по тегу
+clean-ship:
+	docker rmi $(SHIPPING_IMAGE_NAME):$(TAG)
