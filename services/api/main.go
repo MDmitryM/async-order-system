@@ -12,7 +12,6 @@ import (
 	"github.com/MDmitryM/async-order-system/services/api/kafka"
 	"github.com/MDmitryM/async-order-system/services/api/repository"
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,18 +25,23 @@ var (
 	CONSUMER_GROUP = "order-api-group"
 )
 
+// @title Async Order system API
+// @version 1.0
+// @description API for order system
+// @host localhost:8080
+// @BasePath /
 func main() {
 	logrus.Println("api service")
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
 
-	env := os.Getenv("ENV")
-	if env != "prod" {
-		if err := godotenv.Load("./services/api/.env"); err != nil {
-			logrus.Fatalf("error while reding .env, %s", err.Error())
-		}
-	}
+	// env := os.Getenv("ENV")
+	// if env != "prod" {
+	// 	if err := godotenv.Load("./services/api/.env"); err != nil {
+	// 		logrus.Fatalf("error while reding .env, %s", err.Error())
+	// 	}
+	// }
 
 	cfg := repository.PostresConfig{
 		Host:     os.Getenv("API_DB_HOST"),

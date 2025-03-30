@@ -25,7 +25,6 @@ push-bill:
 #удалить образ биллинга по тегу
 clean-bill:
 	docker rmi $(BILLING_IMAGE_NAME):$(TAG)
-
 #сборка shipping сервиса
 build-ship:
 	docker build -f services/shipping/Dockerfile -t $(SHIPPING_IMAGE_NAME):$(TAG) .
@@ -35,3 +34,6 @@ push-ship:
 #удалить образ shipping сервиса по тегу
 clean-ship:
 	docker rmi $(SHIPPING_IMAGE_NAME):$(TAG)
+#swagger generation
+gen-swag:
+	swag init -g services/api/main.go -o services/api/docs

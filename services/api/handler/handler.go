@@ -1,10 +1,12 @@
 package handler
 
 import (
+	_ "github.com/MDmitryM/async-order-system/services/api/docs"
 	"github.com/MDmitryM/async-order-system/services/api/kafka"
 	"github.com/MDmitryM/async-order-system/services/api/repository"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/swagger"
 )
 
 var validate = validator.New(validator.WithRequiredStructEnabled())
@@ -22,6 +24,8 @@ func NewHandler(repo repository.Repository, prod *kafka.Producer) *Handler {
 }
 
 func (h *Handler) InitRouts(app *fiber.App) {
+	app.Get("/swagger/*", swagger.HandlerDefault)
+
 	order := app.Group("/order") //host/order
 
 	orderCreate := order.Group("/create") //order/create

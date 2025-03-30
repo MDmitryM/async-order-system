@@ -1,0 +1,175 @@
+basePath: /
+definitions:
+  handler.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handler.createOrderInput:
+    properties:
+      payment_method:
+        example: SBP
+        type: string
+      product_id:
+        example: 1499
+        type: integer
+      total:
+        example: 15000
+        type: integer
+      user_id:
+        example: 1
+        type: integer
+    required:
+    - payment_method
+    - product_id
+    - total
+    - user_id
+    type: object
+  handler.deleteOrderResponce:
+    properties:
+      status:
+        type: string
+    type: object
+  handler.orderDetailsResponce:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      payment_method:
+        type: string
+      product_id:
+        type: integer
+      status:
+        type: string
+      total:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API for order system
+  title: Async Order system API
+  version: "1.0"
+paths:
+  /order/create/:
+    post:
+      consumes:
+      - application/json
+      description: Create order, produces kafka message
+      parameters:
+      - description: Order
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createOrderInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.orderDetailsResponce'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Create order
+      tags:
+      - orderAPI
+  /order/delete/:
+    delete:
+      description: Deletes order by orderID
+      parameters:
+      - description: Order ID
+        in: query
+        name: orderID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.deleteOrderResponce'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Delete order
+      tags:
+      - orderAPI
+  /order/details/:
+    get:
+      description: Returns order info by orderID
+      parameters:
+      - description: Order ID
+        in: query
+        name: orderID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.orderDetailsResponce'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Order details
+      tags:
+      - orderAPI
+  /order/list/:
+    get:
+      description: Returns list of orders
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        required: true
+        type: string
+      - description: Page size
+        in: query
+        name: pageSize
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handler.orderDetailsResponce'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: List orders
+      tags:
+      - orderAPI
+swagger: "2.0"
