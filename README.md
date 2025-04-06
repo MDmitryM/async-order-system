@@ -6,7 +6,7 @@ REST API сервис для управления заказами, написа
 
 - Go
 - Fiber (веб-фреймворк)
-- PostgreSQL (pgx)
+- PostgreSQL (pgxpool, sqlc)
 - Apache Kafka
 - Docker & Docker Compose
 - Swagger (документация API)
