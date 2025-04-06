@@ -139,14 +139,14 @@ services:
   api-db:
     container_name: api-db
     image: postgres:latest
+    env_file:
+      - services/api/.env
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 10s
       retries: 5
       start_period: 30s
-    env_file:
-      - services/api/.env
     ports:
       - 5432:5432
     networks:
