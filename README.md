@@ -54,13 +54,12 @@ cd async-order-system
 2. Создайте файл `.env` в директории `services/api/`:
 ```env
 # Database
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_password
-POSTGRES_DB=postgres
-API_DB_HOST=api-db
-
-# Application
-ENV=prod
+PORT=8080
+POSTGRES_USER=your_pg_user
+POSTGRES_PASSWORD=your_pg_pwd
+POSTGRES_DB=your_pg_db
+API_DB_PORT=5432
+API_DB_SSL_MODE=disable
 ```
 
 3. Запустите приложение:
